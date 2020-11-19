@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.securitydemo.mapper.SysUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.securitydemo.domain.SysUser">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="org_id" property="orgId" />
+        <result column="create_time" property="createTime" />
+        <result column="enabled" property="enabled" />
+        <result column="phone" property="phone" />
+        <result column="email" property="email" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, username, password, org_id, create_time, enabled, phone, email
+    </sql>
+
+    <select id="findByUserName" resultType="com.example.securitydemo.handler.MyUserDetails"  parameterType="java.lang.String">
+    SELECT
+    username,
+    password,
+    enabled
+    from
+    sys_user
+    where
+    username=#{username}
+    </select>
+
+    <select id="findRoleByUserName" resultType="java.lang.String" parameterType="java.lang.String">
+    SELECT
+    role_code
+    from
+    sys_role r
+    left join sys_user_role ur on r.id=ur.role_id
+    left join  sys_user u on u.id=ur.user_id
+    where
+    u.username=#{username}
+    </select>
+
+    <select id="findAuthorityByRoleCodes" resultType="java.lang.String" parameterType="java.lang.String">
+    SELECT
+    m.menu_url
+    from
+    sys_menu m
+    left join sys_role_menu rm on m.id=rm.menu_id
+    left join sys_role r on r.id=rm.role_id
+    where
+    r.role_code in
+        <foreach collection="roleCodes" item="roleCode" open="(" close=")" separator=",">
+            #{roleCode}
+        </foreach>
+    </select>
+
+    <select id="findUrlsByUserName" resultType="java.lang.String" parameterType="java.lang.String">
+    SELECT
+    m.menu_url
+    from
+    sys_menu m
+    left join sys_role_menu rm on m.id=rm.menu_id
+    left join sys_role r on r.id=rm.role_id
+    left join sys_user_role ur on r.id=ur.role_id
+    left join sys_user u on u.id=ur.user_id
+    where
+    u.username=#{username}
+    </select>
+
+
+
+</mapper>
